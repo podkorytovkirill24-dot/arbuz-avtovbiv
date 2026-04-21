@@ -30,6 +30,8 @@ async def handle_group_worker_state(update: Update, context: ContextTypes.DEFAUL
         return
 
     phone_display = format_phone(row["phone"])
+    sent = False
+    error_text = None
     try:
         if update.message.photo:
             photo_id = update.message.photo[-1].file_id
@@ -46,11 +48,20 @@ async def handle_group_worker_state(update: Update, context: ContextTypes.DEFAUL
                 chat_id=row["user_id"],
                 text=f"Сообщение от оператора по номеру {phone_display}:\n{text_msg}",
             )
-    except Exception:
-        pass
+        sent = True
+    except Exception as exc:
+        logger.warning("Failed to send operator message to user %s: %s", row["user_id"], exc)
+        error_text = str(exc)
 
     clear_state(context)
     try:
-        await update.message.reply_text("✅ Сообщение отправлено владельцу.")
+        if sent:
+            await update.message.reply_text("✅ Сообщение отправлено владельцу.")
+        else:
+            details = f"\nПричина: {error_text}" if error_text else ""
+            await update.message.reply_text(
+                "❌ Не удалось отправить сообщение владельцу. Попросите пользователя нажать /start и повторите отправку."
+                f"{details}"
+            )
     except Exception:
         pass

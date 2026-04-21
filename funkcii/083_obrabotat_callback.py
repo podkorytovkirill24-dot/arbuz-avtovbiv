@@ -353,7 +353,7 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
                 message_thread_id=thread_id if thread_id > 0 else None,
                 text="📥 Рабочая панель\nНажмите кнопку ниже, чтобы получить номер из очереди.",
                 reply_markup=InlineKeyboardMarkup(
-                    [[InlineKeyboardButton("📩 Получить номер", callback_data=f"office:next:{office_id}")]]
+                    [[InlineKeyboardButton("📩 Взять номер", callback_data=f"office:next:{office_id}")]]
                 ),
             )
         except Exception:
@@ -385,7 +385,7 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
                 message_thread_id=thread_id if thread_id > 0 else None,
                 text="📦 Рабочая панель\nНажмите кнопку ниже, чтобы получить номер из очереди.",
                 reply_markup=InlineKeyboardMarkup(
-                    [[InlineKeyboardButton("📩 Получить номер", callback_data="topic:next")]]
+                    [[InlineKeyboardButton("📩 Взять номер", callback_data="topic:next")]]
                 ),
             )
         except Exception:
@@ -1166,13 +1166,17 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
                     caption = query.message.caption or ""
                     await query.message.edit_caption(
                         caption=merge_status_text(caption, status_line),
-                        reply_markup=None,
+                        reply_markup=InlineKeyboardMarkup(
+                            [[InlineKeyboardButton("📩 Взять номер", callback_data="topic:next")]]
+                        ),
                     )
                 else:
                     txt = query.message.text or ""
                     await query.message.edit_text(
                         text=merge_status_text(txt, status_line),
-                        reply_markup=None,
+                        reply_markup=InlineKeyboardMarkup(
+                            [[InlineKeyboardButton("📩 Взять номер", callback_data="topic:next")]]
+                        ),
                     )
         except Exception:
             pass
@@ -1236,10 +1240,13 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
                         [
                             [InlineKeyboardButton("⚠ Слетел", callback_data=f"q:status:slip:{row['id']}")],
                             [InlineKeyboardButton("✉ Сообщение владельцу", callback_data=f"q:msg:{row['id']}")],
+                            [InlineKeyboardButton("📩 Взять номер", callback_data="topic:next")],
                         ]
                     )
                 else:
-                    keyboard = None
+                    keyboard = InlineKeyboardMarkup(
+                        [[InlineKeyboardButton("📩 Взять номер", callback_data="topic:next")]]
+                    )
                 if query.message.photo:
                     caption = query.message.caption or ""
                     await query.message.edit_caption(
